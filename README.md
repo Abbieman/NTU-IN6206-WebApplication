@@ -1,6 +1,8 @@
-# bus-topup-ui
+# NTU-IN6206-WebApplication
 
-### Setup
+### bus-topup-ui
+
+##### Setup
 
 please use node version 23.11.0
 
@@ -10,4 +12,3 @@ npm run dev
 ```
 
 and then open http://localhost:5173
-# NTU-IN6206-WebApplication
