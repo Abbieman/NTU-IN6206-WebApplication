@@ -72,17 +72,10 @@ const Login: React.FC = () => {
 
     if (!registerForm.username.trim()) {
       newErrors.username = "Please enter a username";
-    } else if (registerForm.username.length < 3) {
-      newErrors.username = "Username must be at least 3 characters";
     }
 
     if (!registerForm.password) {
       newErrors.password = "Please enter a password";
-    } else if (registerForm.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(registerForm.password)) {
-      newErrors.password =
-        "Password must contain uppercase, lowercase letters, and numbers";
     }
 
     if (!registerForm.telephone.trim()) {
