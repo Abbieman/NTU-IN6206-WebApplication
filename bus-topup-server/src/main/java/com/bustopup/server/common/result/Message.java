@@ -23,4 +23,6 @@ public class Message {
     public static final String PHONE_EMPTY = "Email can not be empty!";
     public static final String PHONE_WRONG = "Please enter a valid phone number!";
     public static final String LOGIN_SUCCESS = "login successful!";
+    public static final String LOGOUT_SUCCESS = "logout successful!";
+    public static final String INVALID_TOKEN = "Invalid or expired token!";
 }

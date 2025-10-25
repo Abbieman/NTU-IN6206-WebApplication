@@ -3,33 +3,56 @@ package com.bustopup.server.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import javax.crypto.spec.SecretKeySpec;
+import io.jsonwebtoken.security.Keys;
+
+import java.security.Key;
 import java.util.Date;
 
 public class JwtUtil {
 
-    private static final String SECRET = "bus_topup_server"; // Secret key
-    private static final long EXPIRATION_TIME = 86400000; // Expire time
+    private static final String SECRET = "bus_topup_server_super_secure_secret_key_123";
+    private static final Key KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
+    private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24; // 24h
 
-    // generate Token
+    /**
+     * Generate Token
+     */
     public static String generateToken(String userId) {
-        SecretKeySpec secretKeySpec = new SecretKeySpec(SECRET.getBytes(), "HmacSHA256");
         return Jwts.builder()
                 .setSubject(userId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS256, secretKeySpec)
+                .signWith(KEY, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // from Token get ID
+    /**
+     * Get userId from Token
+     */
     public static String getUserIdFromToken(String token) {
-        // clear Bearer
-        token = token.replace("Bearer ", "");
-        Claims claims = Jwts.parser()
-                .setSigningKey(SECRET)
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(KEY)
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
         return claims.getSubject();
+    }
+
+    /**
+     * Check if token is expired
+     */
+    public static boolean isTokenExpired(String token) {
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(KEY)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getExpiration().before(new Date());
     }
 }

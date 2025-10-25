@@ -12,20 +12,25 @@ import com.bustopup.server.enums.UserRole;
 import com.bustopup.server.mapper.UserMapper;
 import com.bustopup.server.service.AuthService;
 import com.bustopup.server.utils.JwtUtil;
-import com.bustopup.server.vo.AuthLoginVo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import java.util.concurrent.TimeUnit;
 import java.util.UUID;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
     private final UserMapper userMapper;
+    private final StringRedisTemplate redisTemplate;
+    private static final long TOKEN_EXPIRE = 24 * 60 * 60; // 24h
 
     @Autowired
-    public AuthServiceImpl(UserMapper userMapper) { this.userMapper = userMapper; }
+    public AuthServiceImpl(UserMapper userMapper, StringRedisTemplate redisTemplate) {
+        this.userMapper = userMapper;
+        this.redisTemplate = redisTemplate;
+    }
 
     private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -49,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
         userMapper.insert(user);
     }
 
-    public AuthLoginVo login(LoginDTO loginDTO) {
+    public String login(LoginDTO loginDTO) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", loginDTO.getUsername());
         User user = userMapper.selectOne(queryWrapper);
@@ -59,9 +64,12 @@ public class AuthServiceImpl implements AuthService {
         if(!encoder.matches(loginDTO.getPassword(), user.getPassword())) {
             throw new BizException(StatusCode.BAD_REQUEST, Message.PASSWORD_NOT_CORRECT);
         }
-        return AuthLoginVo.builder()
-                .username(user.getUsername())
-                .token(JwtUtil.generateToken(user.getId()))
-                .build();
+        String token = JwtUtil.generateToken(user.getId());
+        redisTemplate.opsForValue().set("busTopup:token:" + token, user.getId(), TOKEN_EXPIRE, TimeUnit.SECONDS);
+        return token;
+    }
+
+    public void logout(String token) {
+        redisTemplate.delete("busTopup:token:" + token);
     }
 }
