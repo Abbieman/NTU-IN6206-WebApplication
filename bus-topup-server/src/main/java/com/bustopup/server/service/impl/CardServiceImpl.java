@@ -30,6 +30,7 @@ public class CardServiceImpl implements CardService {
         this.userCardBindingMapper = userCardBindingMapper;
     }
 
+    @Override
     public void addCard(AddCardDTO addCardDTO) {
         if(UserContext.getUserRole() != UserRole.ADMIN) {
             throw new BizException(StatusCode.FORBIDDEN, Message.USER_FORBIDDEN);
@@ -55,6 +56,7 @@ public class CardServiceImpl implements CardService {
         cardMapper.insert(newCard);
     }
 
+    @Override
     public void bindCard(String cardId) {
         String userId = UserContext.getUserId();
         QueryWrapper<Card> queryWrapper = new QueryWrapper<>();
@@ -77,6 +79,7 @@ public class CardServiceImpl implements CardService {
         userCardBindingMapper.insert(binding);
     }
 
+    @Override
     public List<Card> getCardList() {
         String userId = UserContext.getUserId();
         QueryWrapper<UserCardBinding> bindingWrapper = new QueryWrapper<>();

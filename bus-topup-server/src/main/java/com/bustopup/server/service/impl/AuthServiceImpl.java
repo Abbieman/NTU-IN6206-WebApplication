@@ -33,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
 
     private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
+    @Override
     public void register(RegisterDTO registerDTO) {
         String username = registerDTO.getUsername();
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
@@ -54,6 +55,7 @@ public class AuthServiceImpl implements AuthService {
         userMapper.insert(newUser);
     }
 
+    @Override
     public String login(LoginDTO loginDTO) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", loginDTO.getUsername());
@@ -69,6 +71,7 @@ public class AuthServiceImpl implements AuthService {
         return token;
     }
 
+    @Override
     public void logout(String token) {
         redisTemplate.delete("busTopup:token:" + token);
     }

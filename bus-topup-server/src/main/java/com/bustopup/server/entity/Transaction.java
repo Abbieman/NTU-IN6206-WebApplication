@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,7 +17,7 @@ public class Transaction {
     private String id;
     private String userId;
     private String cardId;
-    private Float amount;
+    private BigDecimal amount;
     private TransactionType type;
     private LocalDateTime createdAt;
 }

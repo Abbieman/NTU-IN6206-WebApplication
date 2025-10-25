@@ -14,14 +14,14 @@ public class Message {
     public static final String REGISTER_SUCCESS = "Registration successful!";
     public static final String USERNAME_EXISTS = "User already exists!";
     public static final String USERNAME_NOT_EXISTS = "User not exists!";
-    public static final String USERNAME_EMPTY = "Username can not be empty!";
+    public static final String USERNAME_EMPTY = "Username cannot be empty!";
     public static final String USERNAME_CONTAIN_BLANK = "Username can not contain blank!";
-    public static final String PASSWORD_EMPTY = "Password can not be empty!";
+    public static final String PASSWORD_EMPTY = "Password cannot be empty!";
     public static final String PASSWORD_NOT_CORRECT = "Password is not correct!";
     public static final String PASSWORD_CONTAIN_BLANK = "Password can not contain blank!";
-    public static final String EMAIL_EMPTY = "Email can not be empty!";
+    public static final String EMAIL_EMPTY = "Email cannot be empty!";
     public static final String EMAIL_WRONG = "Please enter a valid email address!";
-    public static final String PHONE_EMPTY = "Email can not be empty!";
+    public static final String PHONE_EMPTY = "Email cannot be empty!";
     public static final String PHONE_WRONG = "Please enter a valid phone number!";
     public static final String LOGIN_SUCCESS = "Login successful!";
     public static final String LOGOUT_SUCCESS = "Logout successful!";
@@ -39,4 +39,12 @@ public class Message {
     public static final String CARD_BALANCE_EMPTY = "Balance cannot be empty!";
     public static final String CARD_BALANCE_NOT_CORRECT = "Balance must be a valid number with up to 2 decimal places!";
     public static final String GET_CARD_SUCCESS = "Get card successful!";
+
+    // ====== Transaction ======
+    public static final String INSUFFICIENT_BALANCE = "You don't have enough money!";
+    public static final String AMOUNT_NULL = "Amount cannot be null!";
+    public static final String AMOUNT_MORE_THAN_0 = "Amount must be greater than 0";
+    public static final String TYPE_NULL = "Type cannot be null!";
+    public static final String TRANSACTION_ADDED = "Transaction added!";
+    public static final String GET_TRANSACTION_SUCCESS = "Get transaction successful!";
 }

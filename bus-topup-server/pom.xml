@@ -39,6 +39,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- 表单/参数校验支持，提供 @Valid、@NotBlank、@Size 等注解功能 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+            <version>3.4.3</version>
+        </dependency>
         <!-- Spring Boot Web 核心依赖，包含 Spring MVC + 内嵌 Tomcat 等，用于构建 REST 接口 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

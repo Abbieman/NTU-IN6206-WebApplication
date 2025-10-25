@@ -1,7 +1,7 @@
 package com.bustopup.server.dto;
 
 import com.bustopup.server.common.result.Message;
-import com.bustopup.server.enums.CardType;
+import com.bustopup.server.enums.TransactionType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,16 +17,15 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddCardDTO {
-
+public class AddTransactionDTO {
     @NotBlank(message = Message.CARD_NUM_EMPTY)
     @Pattern(regexp = "^\\d{16}$", message = Message.CARD_NUM_16_DIGITS)
     private String cardNumber;
 
-    @NotNull(message = Message.CARD_TYPE_EMPTY)
-    private CardType type;
+    @NotNull(message = Message.AMOUNT_NULL)
+    @DecimalMin(value = "0.01", message = Message.AMOUNT_MORE_THAN_0)
+    private BigDecimal amount;
 
-    @NotNull(message = Message.CARD_BALANCE_EMPTY)
-    @DecimalMin(value = "0.01", message = Message.CARD_BALANCE_NOT_CORRECT)
-    private BigDecimal balance;
+    @NotNull(message = Message.TYPE_NULL)
+    private TransactionType type;
 }
