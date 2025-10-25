@@ -7,9 +7,12 @@ import com.bustopup.server.common.result.StatusCode;
 import com.bustopup.server.context.UserContext;
 import com.bustopup.server.entity.Card;
 import com.bustopup.server.entity.Transaction;
+import com.bustopup.server.enums.NotificationType;
 import com.bustopup.server.enums.TransactionType;
+import com.bustopup.server.event.NotificationEvent;
 import com.bustopup.server.mapper.CardMapper;
 import com.bustopup.server.mapper.TransactionMapper;
+import com.bustopup.server.publisher.NotificationPublisher;
 import com.bustopup.server.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,11 +28,13 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final CardMapper cardMapper;
     private final TransactionMapper transactionMapper;
+    private final NotificationPublisher notificationPublisher;
 
     @Autowired
-    public TransactionServiceImpl(CardMapper cardMapper, TransactionMapper transactionMapper) {
+    public TransactionServiceImpl(CardMapper cardMapper, TransactionMapper transactionMapper, NotificationPublisher notificationPublisher) {
         this.cardMapper = cardMapper;
         this.transactionMapper = transactionMapper;
+        this.notificationPublisher = notificationPublisher;
     }
 
     private Card getCardByNum(String cardNum) {
@@ -58,16 +63,24 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public void processTopUp(String cardNumber, BigDecimal amount) {
+        String userId = UserContext.getUserId();
         Card card = getCardByNum(cardNumber);
         card.setBalance(card.getBalance().add(amount));
         cardMapper.updateById(card);
         recordTransaction(card.getId(), amount, TransactionType.TOP_UP);
+        notificationPublisher.publish(new NotificationEvent(
+                userId,
+                "Top up",
+                "You topped up S$" + amount,
+                NotificationType.TOP_UP
+        ));
     }
 
     // payment
     @Override
     @Transactional
     public void processPayment(String cardNumber, BigDecimal amount) {
+        String userId = UserContext.getUserId();
         Card card = getCardByNum(cardNumber);
         if (card.getBalance().compareTo(amount) < 0) {
             throw new BizException(StatusCode.BAD_REQUEST, Message.INSUFFICIENT_BALANCE);
@@ -75,16 +88,29 @@ public class TransactionServiceImpl implements TransactionService {
         card.setBalance(card.getBalance().subtract(amount));
         cardMapper.updateById(card);
         recordTransaction(card.getId(), amount.negate(), TransactionType.PAYMENT);
+        notificationPublisher.publish(new NotificationEvent(
+                userId,
+                "Payment",
+                "You paid S$" + amount,
+                NotificationType.PAYMENT
+        ));
     }
 
     // refund
     @Override
     @Transactional
     public void processRefund(String cardNumber, BigDecimal amount) {
+        String userId = UserContext.getUserId();
         Card card = getCardByNum(cardNumber);
         card.setBalance(card.getBalance().add(amount));
         cardMapper.updateById(card);
         recordTransaction(card.getId(), amount, TransactionType.REFUND);
+        notificationPublisher.publish(new NotificationEvent(
+                userId,
+                "Refund",
+                "Refund to you account S$" + amount,
+                NotificationType.PAYMENT
+        ));
     }
 
     @Override

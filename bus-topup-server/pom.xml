@@ -39,6 +39,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- 建立 websocket 连接 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+            <version>3.5.6</version>
+        </dependency>
         <!-- 表单/参数校验支持，提供 @Valid、@NotBlank、@Size 等注解功能 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
