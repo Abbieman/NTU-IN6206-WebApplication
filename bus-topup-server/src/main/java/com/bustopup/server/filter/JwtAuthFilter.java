@@ -2,6 +2,7 @@ package com.bustopup.server.filter;
 
 import com.bustopup.server.common.result.Message;
 import com.bustopup.server.context.UserContext;
+import com.bustopup.server.enums.UserRole;
 import com.bustopup.server.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -63,7 +64,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
             // Set user info to UserText
             String userId = JwtUtil.getUserIdFromToken(token);
+            UserRole userRole = JwtUtil.getRoleFromToken(token);
             UserContext.setUserId(userId);
+            UserContext.setUserRole(userRole);
             filterChain.doFilter(request, response);
         } catch (Exception e) {
             e.printStackTrace();

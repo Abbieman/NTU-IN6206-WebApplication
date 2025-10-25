@@ -3,7 +3,6 @@ package com.bustopup.server.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bustopup.server.common.exception.BizException;
 import com.bustopup.server.common.result.Message;
-import com.bustopup.server.common.result.Result;
 import com.bustopup.server.common.result.StatusCode;
 import com.bustopup.server.dto.LoginDTO;
 import com.bustopup.server.dto.RegisterDTO;
@@ -38,12 +37,13 @@ public class AuthServiceImpl implements AuthService {
         String username = registerDTO.getUsername();
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", username);
-        if (registerDTO.getPassword() != null) {
-            Result.error(StatusCode.BAD_REQUEST, Message.USERNAME_EXISTS);
+        User user = userMapper.selectOne(queryWrapper);
+        if (user != null) {
+            throw new BizException(StatusCode.BAD_REQUEST, Message.USERNAME_EXISTS);
         }
         // use bcrypt hash and set it into database
         String hashedPassword = encoder.encode(registerDTO.getPassword());
-        User user = User.builder()
+        User newUser = User.builder()
                 .id(UUID.randomUUID().toString())
                 .username(username)
                 .password(hashedPassword)
@@ -51,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(registerDTO.getEmail())
                 .role(UserRole.USER)
                 .build();
-        userMapper.insert(user);
+        userMapper.insert(newUser);
     }
 
     public String login(LoginDTO loginDTO) {
@@ -64,7 +64,7 @@ public class AuthServiceImpl implements AuthService {
         if(!encoder.matches(loginDTO.getPassword(), user.getPassword())) {
             throw new BizException(StatusCode.BAD_REQUEST, Message.PASSWORD_NOT_CORRECT);
         }
-        String token = JwtUtil.generateToken(user.getId());
+        String token = JwtUtil.generateToken(user.getId(), user.getRole());
         redisTemplate.opsForValue().set("busTopup:token:" + token, user.getId(), TOKEN_EXPIRE, TimeUnit.SECONDS);
         return token;
     }

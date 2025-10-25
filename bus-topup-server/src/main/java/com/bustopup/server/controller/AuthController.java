@@ -28,7 +28,7 @@ public class AuthController {
 
     // Authorization register
     @PostMapping("/register")
-    @Operation(summary = "register", description = "register")
+    @Operation(summary = "register")
     public Result<Object> register(@Valid @RequestBody RegisterDTO registerDTO) {
         authService.register(registerDTO);
         return Result.success(Message.REGISTER_SUCCESS);
@@ -36,7 +36,7 @@ public class AuthController {
 
     // Authorization login
     @PostMapping("/login")
-    @Operation(summary = "login" , description = "login")
+    @Operation(summary = "login")
     public Result<Object> login(@Valid @RequestBody LoginDTO loginDTO, HttpServletResponse response) {
         String token = authService.login(loginDTO);
         return Result.success(token, Message.LOGIN_SUCCESS);
@@ -44,7 +44,7 @@ public class AuthController {
 
     // Authorization logout
     @PostMapping("/logout")
-    @Operation(summary = "logout" , description = "logout")
+    @Operation(summary = "logout")
     public Result<Object> logout(HttpServletRequest request) {
         // get token from Authorization
         String header = request.getHeader("Authorization");
