@@ -3,11 +3,13 @@ package com.bustopup.server.service;
 import com.bustopup.server.dto.AddCardDTO;
 import com.bustopup.server.entity.Card;
 
+import java.util.List;
+
 public interface CardService {
-    // add card
+    // Add Card
     void addCard(AddCardDTO addCardDTO);
-    // bind card
+    // Bind Card
     void bindCard(String cardId);
-    // user: remove card
-    // void removeCard(Card card);
+    // Get Card Info
+    List<Card> getCardList();
 }

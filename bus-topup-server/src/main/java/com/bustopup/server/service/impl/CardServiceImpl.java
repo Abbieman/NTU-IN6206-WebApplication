@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -62,10 +63,33 @@ public class CardServiceImpl implements CardService {
         if (card == null) {
             throw new BizException(StatusCode.BAD_REQUEST, Message.CARD_NOT_EXISTS);
         }
+        // check if the card is binding with the user
+        QueryWrapper<UserCardBinding> bindingQuery = new QueryWrapper<>();
+        bindingQuery.eq("user_id", userId).eq("card_id", cardId);
+        UserCardBinding existing = userCardBindingMapper.selectOne(bindingQuery);
+        if (existing != null) {
+            throw new BizException(StatusCode.BAD_REQUEST, Message.CARD_ALREADY_BIND);
+        }
         UserCardBinding binding = UserCardBinding.builder()
                 .userId(userId)
                 .cardId(cardId)
                 .build();
         userCardBindingMapper.insert(binding);
+    }
+
+    public List<Card> getCardList() {
+        String userId = UserContext.getUserId();
+        QueryWrapper<UserCardBinding> bindingWrapper = new QueryWrapper<>();
+        bindingWrapper.eq("user_id", userId);
+        List<UserCardBinding> bindings = userCardBindingMapper.selectList(bindingWrapper);
+        if (bindings.isEmpty()) {
+            return List.of();
+        }
+        List<String> cardIds = bindings.stream()
+                .map(UserCardBinding::getCardId)
+                .toList();
+        QueryWrapper<Card> cardQuery = new QueryWrapper<>();
+        cardQuery.in("id", cardIds);
+        return cardMapper.selectList(cardQuery);
     }
 }

@@ -32,9 +32,11 @@ public class Message {
     public static final String CARD_NOT_EXISTS = "Card not exists!";
     public static final String ADD_CARD_SUCCESS = "Add card successful!";
     public static final String BIND_CARD_SUCCESS = "Bind card successful!";
+    public static final String CARD_ALREADY_BIND = "Card already binds with the user!";
     public static final String CARD_NUM_EMPTY = "Card number cannot be empty!";
     public static final String CARD_NUM_16_DIGITS = "Card number must be 16 digits!";
     public static final String CARD_TYPE_EMPTY = "Card type cannot be empty!";
     public static final String CARD_BALANCE_EMPTY = "Balance cannot be empty!";
     public static final String CARD_BALANCE_NOT_CORRECT = "Balance must be a valid number with up to 2 decimal places!";
+    public static final String GET_CARD_SUCCESS = "Get card successful!";
 }
