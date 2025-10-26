@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/card")
+@RequestMapping("/api/card")
 @Tag(name = "Card")
 public class CardController {
     CardService cardService;

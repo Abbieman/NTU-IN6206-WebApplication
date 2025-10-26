@@ -1,9 +1,12 @@
 package com.bustopup.server.filter;
 
 import com.bustopup.server.common.result.Message;
+import com.bustopup.server.common.result.Result;
+import com.bustopup.server.common.result.StatusCode;
 import com.bustopup.server.context.UserContext;
 import com.bustopup.server.enums.UserRole;
 import com.bustopup.server.utils.JwtUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +31,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private static final List<String> EXCLUDED_PATHS = List.of(
             "/auth/login",
             "/auth/register",
+            "/api/auth/login",
+            "/api/auth/register",
             "/v3/api-docs",          // Swagger JSON
             "/swagger-ui",           // Swagger UI Static Resource
             "/swagger-ui.html",
@@ -79,8 +84,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private void unauthorized(HttpServletResponse response) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(Message.INVALID_TOKEN);
+        // 构造返回对象
+        Result<Object> result = Result.error(StatusCode.UNAUTHORIZED, Message.INVALID_TOKEN);
+        // 使用 Jackson 把 Java 对象写成 JSON 并输出
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.writeValue(response.getWriter(), result);
     }
+
 }

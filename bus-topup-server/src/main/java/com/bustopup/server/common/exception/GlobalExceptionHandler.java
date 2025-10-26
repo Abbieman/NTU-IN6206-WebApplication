@@ -28,7 +28,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public Result<?> handleException() {
+    public Result<?> handleException(Exception e) {
+        e.printStackTrace();
         return Result.error(StatusCode.INTERNAL_SERVER_ERROR, Message.SERVER_INTERVAL_ERROR);
     }
 }

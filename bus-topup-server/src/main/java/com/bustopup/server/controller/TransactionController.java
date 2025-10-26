@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/transaction")
+@RequestMapping("/api/transaction")
 @Tag(name = "Transaction")
 public class TransactionController {
 
@@ -41,7 +41,6 @@ public class TransactionController {
     @Operation(summary = "get all transaction")
     public Result<List<Transaction>> getTransactionList() {
         List<Transaction> transactionList = transactionService.getTransactionList();
-        System.out.println(transactionList);
         return Result.success(transactionList, Message.GET_TRANSACTION_SUCCESS);
     }
 }

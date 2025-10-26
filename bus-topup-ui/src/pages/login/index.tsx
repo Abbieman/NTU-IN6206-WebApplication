@@ -1,8 +1,8 @@
+import Cookies from "js-cookie";
 import {
   AlertCircle,
   Bus,
   Car,
-  CheckCircle2,
   CreditCard,
   Eye,
   EyeOff,
@@ -13,6 +13,9 @@ import {
   User,
 } from "lucide-react";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { authLogin, authRegister } from "../../api/auth";
+import { useToast } from "../../hooks/useToast";
 
 interface LoginForm {
   username: string;
@@ -22,8 +25,8 @@ interface LoginForm {
 interface RegisterForm {
   username: string;
   password: string;
-  telephone: string;
   email: string;
+  phone: string;
 }
 
 interface FormErrors {
@@ -31,10 +34,12 @@ interface FormErrors {
 }
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
+  const { toast, ToastWrapper } = useToast();
+
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
 
   const [loginForm, setLoginForm] = useState<LoginForm>({
     username: "",
@@ -44,8 +49,8 @@ const Login: React.FC = () => {
   const [registerForm, setRegisterForm] = useState<RegisterForm>({
     username: "",
     password: "",
-    telephone: "",
     email: "",
+    phone: "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -78,9 +83,9 @@ const Login: React.FC = () => {
       newErrors.password = "Please enter a password";
     }
 
-    if (!registerForm.telephone.trim()) {
+    if (!registerForm.phone.trim()) {
       newErrors.telephone = "Please enter your phone number";
-    } else if (!/^[0-9]{8,11}$/.test(registerForm.telephone)) {
+    } else if (!/^[0-9]{8,11}$/.test(registerForm.phone)) {
       newErrors.telephone = "Please enter a valid phone number";
     }
 
@@ -96,61 +101,53 @@ const Login: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateLogin()) return;
-
     setIsLoading(true);
-    setSuccessMessage("");
 
-    // Simulate API request
-    setTimeout(() => {
+    const res = await authLogin(loginForm);
+    if (res.code === 200) {
       setIsLoading(false);
-      setSuccessMessage("Login successful!");
-      console.log("Login:", loginForm);
-
-      // Example: Navigate to dashboard
+      Cookies.set("token", res.data, { expires: 1 });
+      toast.success(res.msg || "Login successful!");
       setTimeout(() => {
-        setSuccessMessage("");
+        navigate("/my-card");
       }, 2000);
-    }, 1500);
+      return;
+    }
+    setIsLoading(false);
+    return toast.error(res.msg || "Login failed!");
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateRegister()) return;
-
     setIsLoading(true);
-    setSuccessMessage("");
 
-    // Simulate API request
-    setTimeout(() => {
+    const res = await authRegister(registerForm);
+    if (res.code === 200) {
       setIsLoading(false);
-      setSuccessMessage("Registration successful! Please log in.");
-      console.log("Register:", registerForm);
-
-      // Switch to login screen
-      setTimeout(() => {
-        setIsLogin(true);
-        setSuccessMessage("");
-        setRegisterForm({
-          username: "",
-          password: "",
-          telephone: "",
-          email: "",
-        });
-      }, 2000);
-    }, 1500);
+      setIsLogin(true);
+      toast.success(res.msg || "Registration successful!");
+      setRegisterForm({
+        username: "",
+        password: "",
+        email: "",
+        phone: "",
+      });
+      return;
+    }
+    setIsLoading(false);
+    return toast.error(res.msg || "Registration failed.");
   };
 
   const switchMode = () => {
     setIsLogin(!isLogin);
     setErrors({});
-    setSuccessMessage("");
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {ToastWrapper}
       {/* Background Decorations */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-white opacity-5 rounded-full -ml-48 -mt-48"></div>
       <div className="absolute top-1/4 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-32"></div>
@@ -201,14 +198,6 @@ const Login: React.FC = () => {
           </div>
 
           <div className="p-8">
-            {/* Success Message */}
-            {successMessage && (
-              <div className="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
-                <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
-                <p className="text-green-700 font-medium">{successMessage}</p>
-              </div>
-            )}
-
             {/* Login Form */}
             {isLogin ? (
               <form onSubmit={handleLogin} className="space-y-5">
@@ -343,7 +332,7 @@ const Login: React.FC = () => {
                           ? "border-red-300 focus:border-red-500"
                           : "border-gray-200 focus:border-blue-500"
                       }`}
-                      placeholder="Enter username (min. 3 characters)"
+                      placeholder="Enter username"
                     />
                   </div>
                   {errors.username && (
@@ -377,7 +366,7 @@ const Login: React.FC = () => {
                           ? "border-red-300 focus:border-red-500"
                           : "border-gray-200 focus:border-blue-500"
                       }`}
-                      placeholder="Enter password (6+ chars, with letters & numbers)"
+                      placeholder="Enter password"
                     />
                     <button
                       type="button"
@@ -408,11 +397,11 @@ const Login: React.FC = () => {
                     <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                       type="tel"
-                      value={registerForm.telephone}
+                      value={registerForm.phone}
                       onChange={(e) => {
                         setRegisterForm({
                           ...registerForm,
-                          telephone: e.target.value,
+                          phone: e.target.value,
                         });
                         if (errors.telephone)
                           setErrors({ ...errors, telephone: "" });

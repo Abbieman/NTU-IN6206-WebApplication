@@ -5,6 +5,9 @@ package com.bustopup.server.common.result;
  */
 public class Message {
 
+    // ====== Common ======
+    public static final String SUCCESS = "Success";
+
     // ====== Exception ======
     public static final String REQUEST_BODY_NOT_CORRECT = "Request body is not correct!";
     public static final String SERVER_INTERVAL_ERROR = "Interval server error!";

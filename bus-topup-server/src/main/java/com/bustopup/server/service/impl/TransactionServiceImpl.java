@@ -70,8 +70,8 @@ public class TransactionServiceImpl implements TransactionService {
         recordTransaction(card.getId(), amount, TransactionType.TOP_UP);
         notificationPublisher.publish(new NotificationEvent(
                 userId,
-                "Top up",
-                "You topped up S$" + amount,
+                "Top Up Successful",
+                "You topped up S$" + amount + " to your account!",
                 NotificationType.TOP_UP
         ));
     }
@@ -90,8 +90,8 @@ public class TransactionServiceImpl implements TransactionService {
         recordTransaction(card.getId(), amount.negate(), TransactionType.PAYMENT);
         notificationPublisher.publish(new NotificationEvent(
                 userId,
-                "Payment",
-                "You paid S$" + amount,
+                "Payment Record",
+                "You have paid S$" + amount + " for public transport!",
                 NotificationType.PAYMENT
         ));
     }
@@ -107,8 +107,8 @@ public class TransactionServiceImpl implements TransactionService {
         recordTransaction(card.getId(), amount, TransactionType.REFUND);
         notificationPublisher.publish(new NotificationEvent(
                 userId,
-                "Refund",
-                "Refund to you account S$" + amount,
+                "Refund to Your Account",
+                "You have receive a refund of S$" + amount + " to you account!",
                 NotificationType.PAYMENT
         ));
     }

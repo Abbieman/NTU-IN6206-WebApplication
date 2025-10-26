@@ -6,19 +6,17 @@ import com.bustopup.server.common.result.StatusCode;
 import com.bustopup.server.dto.LoginDTO;
 import com.bustopup.server.dto.RegisterDTO;
 import com.bustopup.server.service.AuthService;
+import com.bustopup.server.vo.UserInfoVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @Tag(name="Authorization")
 public class AuthController {
     AuthService authService;
@@ -54,5 +52,13 @@ public class AuthController {
         String token = header.substring(7);
         authService.logout(token);
         return Result.success(Message.LOGOUT_SUCCESS);
+    }
+
+    // Get User Info
+    @GetMapping("/getUserInfo")
+    @Operation(summary = "get user information")
+    public Result<Object> getUserInfo() {
+        UserInfoVo userInfoVo = authService.getUserInfo();
+        return Result.success(userInfoVo, Message.SUCCESS);
     }
 }

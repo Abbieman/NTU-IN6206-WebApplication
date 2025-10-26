@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bustopup.server.common.exception.BizException;
 import com.bustopup.server.common.result.Message;
 import com.bustopup.server.common.result.StatusCode;
+import com.bustopup.server.context.UserContext;
 import com.bustopup.server.dto.LoginDTO;
 import com.bustopup.server.dto.RegisterDTO;
 import com.bustopup.server.entity.User;
@@ -11,6 +12,7 @@ import com.bustopup.server.enums.UserRole;
 import com.bustopup.server.mapper.UserMapper;
 import com.bustopup.server.service.AuthService;
 import com.bustopup.server.utils.JwtUtil;
+import com.bustopup.server.vo.UserInfoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -74,5 +76,21 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void logout(String token) {
         redisTemplate.delete("busTopup:token:" + token);
+    }
+
+    @Override
+    public UserInfoVo getUserInfo() {
+        String userId = UserContext.getUserId();
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", userId);
+        User user = userMapper.selectOne(queryWrapper);
+        if (user == null) {
+            throw new BizException(StatusCode.BAD_REQUEST, Message.USERNAME_NOT_EXISTS);
+        }
+        return UserInfoVo.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .build();
     }
 }
