@@ -4,6 +4,7 @@ import com.bustopup.server.common.result.Message;
 import com.bustopup.server.common.result.Result;
 import com.bustopup.server.dto.AddCardDTO;
 import com.bustopup.server.entity.Card;
+import com.bustopup.server.enums.CardType;
 import com.bustopup.server.service.CardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,8 +38,10 @@ public class CardController {
     @PostMapping("/bindCard")
     @Operation(summary = "bind new card")
     public Result<Object> bindCard(@RequestBody Map<String, String> body) {
-        String cardId = body.get("cardId");
-        cardService.bindCard(cardId);
+        System.out.println(body);
+        String cardNumber = body.get("cardNumber");
+        CardType cardType = CardType.valueOf(body.get("cardType"));
+        cardService.bindCard(cardNumber, cardType);
         return Result.success(Message.BIND_CARD_SUCCESS);
     }
 

@@ -9,46 +9,53 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { bindCard, getCardList } from "../../api/card";
+import { addTransaction } from "../../api/transaction";
+import { useToast } from "../../hooks/useToast";
 import type { AnyType } from "../../types";
+import { formatDate } from "../../utils/time";
+
+interface Card {
+  id: string;
+  name?: string;
+  cardNumber: string;
+  type: "STUDENT" | "SENIOR" | "ADULT";
+  balance: number;
+  createdAt: string;
+  expiredAt: string;
+}
 
 const MyCard: React.FC = () => {
-  const [cards, setCards] = useState([
-    {
-      id: 1,
-      type: "student",
-      balance: 16.11,
-      cardNumber: "1000 2400 2471 4007",
-      expiryDate: "25/06/2031",
-      name: "Student Card",
-    },
-  ]);
+  const { toast, ToastWrapper } = useToast();
 
-  const [showTopUp, setShowTopUp] = useState(false);
-  const [showAddCard, setShowAddCard] = useState(false);
-  const [selectedCard, setSelectedCard] = useState(null);
-  const [selectedAmount, setSelectedAmount] = useState(null);
-  const [selectedCardType, setSelectedCardType] = useState(null);
+  const [cards, setCards] = useState<Card[]>([]);
+  const [showTopUp, setShowTopUp] = useState<boolean>(false);
+  const [showAddCard, setShowAddCard] = useState<boolean>(false);
+  const [cardNumber, setCardNumber] = useState("");
+  const [selectedCard, setSelectedCard] = useState<string>("");
+  const [selectedAmount, setSelectedAmount] = useState<number>(0);
+  const [selectedCardType, setSelectedCardType] = useState("");
 
   const topUpAmounts = [10, 20, 50, 100];
 
   const cardTypes = [
     {
-      type: "student",
+      type: "STUDENT",
       name: "Student Card",
       icon: GraduationCap,
       color: "from-green-600 to-emerald-700",
       discount: "50% Discount",
     },
     {
-      type: "senior",
+      type: "SENIOR",
       name: "Senior Card",
       icon: Users,
       color: "from-orange-600 to-red-700",
       discount: "Free Rides",
     },
     {
-      type: "adult",
+      type: "ADULT",
       name: "Adult Card",
       icon: Wallet,
       color: "from-blue-700 to-indigo-900",
@@ -56,42 +63,63 @@ const MyCard: React.FC = () => {
     },
   ];
 
-  const handleTopUp = (amount: number) => {
-    if (selectedCard !== null) {
-      setCards((prevCards) =>
-        prevCards.map((card) =>
-          card.id === selectedCard
-            ? { ...card, balance: card.balance + amount }
-            : card
-        )
-      );
-      setSelectedAmount(null);
-      setSelectedCard(null);
-      setShowTopUp(false);
-    }
+  const fetchCards = async () => {
+    const res = await getCardList();
+    const cards: Card[] = [];
+    (res.data as Card[]).forEach((card) => {
+      cards.push({
+        id: card.id,
+        cardNumber: card.cardNumber,
+        type: card.type,
+        balance: card.balance,
+        createdAt: formatDate(card.createdAt),
+        expiredAt: formatDate(card.expiredAt),
+        name:
+          card.type === "STUDENT"
+            ? "Student Card"
+            : card.type === "SENIOR"
+            ? "Senior Card"
+            : "Adult Card",
+      });
+    });
+    setCards(cards);
   };
 
-  const handleAddCard = () => {
-    if (selectedCardType) {
-      const cardTypeInfo = cardTypes.find((ct) => ct.type === selectedCardType);
-      const newCard = {
-        id: cards.length + 1,
-        type: selectedCardType,
-        balance: 0,
-        cardNumber: `${1000 + cards.length} ${2400 + cards.length} ${
-          2471 + cards.length
-        } ${4007 + cards.length}`,
-        expiryDate: "25/06/2031",
-        name: (cardTypeInfo as AnyType).name,
-      };
-      setCards([...cards, newCard]);
-      setSelectedCardType(null);
+  useEffect(() => {
+    fetchCards();
+  }, []);
+
+  const handleTopUp = async (amount: number) => {
+    const res = await addTransaction({
+      cardNumber: selectedCard,
+      amount: amount as number,
+      type: "TOP_UP",
+    });
+    if (res.code === 200) {
+      toast.success(res.msg || "Top up successfully!");
+      fetchCards();
+    } else {
+      return toast.error(res.msg || "Top up failed!");
+    }
+    setShowTopUp(false);
+  };
+
+  const handleAddCard = async () => {
+    const res = await bindCard({
+      cardNumber: cardNumber.trim(),
+      cardType: selectedCardType as string,
+    });
+    if (res.code === 200) {
+      toast.success(res.msg || "Bind card successfully!");
       setShowAddCard(false);
+      fetchCards();
+    } else {
+      return toast.error(res.msg || "Bind card failed!");
     }
   };
 
-  const openTopUpModal = (cardId: AnyType) => {
-    setSelectedCard(cardId);
+  const openTopUpModal = (cardNumber: string) => {
+    setSelectedCard(cardNumber);
     setShowTopUp(true);
   };
 
@@ -107,6 +135,7 @@ const MyCard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {ToastWrapper}
       {/* Header */}
       <div className="sticky top-0 h-16 w-full bg-white px-6 py-4 items-center justify-between shadow-sm z-50">
         <h1 className="text-2xl font-bold text-gray-900">My Transit Cards</h1>
@@ -164,7 +193,7 @@ const MyCard: React.FC = () => {
           </button>
 
           <button
-            onClick={() => cards.length > 0 && openTopUpModal(cards[0].id)}
+            onClick={() => toast.error("Quick Top-up coming soon!")}
             className="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition flex flex-col items-center justify-center gap-3"
           >
             <div className="bg-green-100 rounded-full p-4">
@@ -196,7 +225,7 @@ const MyCard: React.FC = () => {
                     </span>
                   </div>
                   <button
-                    onClick={() => openTopUpModal(card.id)}
+                    onClick={() => openTopUpModal(card.cardNumber)}
                     className="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-full text-sm font-semibold transition"
                   >
                     Top Up
@@ -212,7 +241,7 @@ const MyCard: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-blue-200 text-sm mb-1">Valid Until</p>
-                    <p className="text-lg font-semibold">{card.expiryDate}</p>
+                    <p className="text-lg font-semibold">{card.expiredAt}</p>
                   </div>
                 </div>
 
@@ -244,14 +273,16 @@ const MyCard: React.FC = () => {
       {showAddCard && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-[100]">
           <div className="bg-white rounded-t-3xl w-full max-w-2xl p-6 animate-slide-up">
+            {/* Header */}
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Select Card Type</h2>
+              <h2 className="text-2xl font-bold">Bind Card</h2>
               <div
                 onClick={() => {
                   setShowAddCard(false);
-                  setSelectedCardType(null);
+                  setSelectedCardType("");
+                  setCardNumber("");
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 cursor-pointer"
               >
                 <svg
                   className="w-8 h-8"
@@ -269,6 +300,18 @@ const MyCard: React.FC = () => {
               </div>
             </div>
 
+            {/* ✅ Add Card Number Input */}
+            <div className="mb-6">
+              <input
+                type="text"
+                value={cardNumber}
+                onChange={(e) => setCardNumber(e.target.value)}
+                placeholder="Enter Card Number"
+                className="w-full border border-gray-300 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+              />
+            </div>
+
+            {/* Card Type List */}
             <div className="space-y-4 mb-6">
               {cardTypes.map((cardType) => {
                 const Icon = cardType.icon;
@@ -323,11 +366,12 @@ const MyCard: React.FC = () => {
               })}
             </div>
 
+            {/* Add Button */}
             <button
               onClick={handleAddCard}
-              disabled={!selectedCardType}
+              disabled={!selectedCardType || !cardNumber.trim()}
               className={`w-full py-4 rounded-2xl font-bold text-lg transition ${
-                selectedCardType
+                selectedCardType && cardNumber.trim()
                   ? "bg-blue-600 text-white hover:bg-blue-700"
                   : "bg-gray-200 text-gray-400 cursor-not-allowed"
               }`}
@@ -347,8 +391,8 @@ const MyCard: React.FC = () => {
               <div
                 onClick={() => {
                   setShowTopUp(false);
-                  setSelectedAmount(null);
-                  setSelectedCard(null);
+                  setSelectedAmount(0);
+                  setSelectedCard("");
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >

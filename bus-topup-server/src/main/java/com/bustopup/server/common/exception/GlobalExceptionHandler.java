@@ -13,11 +13,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public Result<?> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        ex.printStackTrace();
         return Result.error(StatusCode.BAD_REQUEST, Message.REQUEST_BODY_NOT_CORRECT);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Result<?> handleValidationException(MethodArgumentNotValidException ex) {
+        ex.printStackTrace();
         String errorMsg = ex.getBindingResult().getFieldError().getDefaultMessage();
         return Result.error(StatusCode.BAD_REQUEST, errorMsg);
     }

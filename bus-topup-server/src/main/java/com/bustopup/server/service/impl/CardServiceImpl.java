@@ -8,6 +8,7 @@ import com.bustopup.server.context.UserContext;
 import com.bustopup.server.dto.AddCardDTO;
 import com.bustopup.server.entity.Card;
 import com.bustopup.server.entity.UserCardBinding;
+import com.bustopup.server.enums.CardType;
 import com.bustopup.server.enums.UserRole;
 import com.bustopup.server.mapper.CardMapper;
 import com.bustopup.server.mapper.UserCardBindingMapper;
@@ -57,24 +58,25 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
-    public void bindCard(String cardId) {
+    public void bindCard(String cardNumber, CardType cardType) {
         String userId = UserContext.getUserId();
         QueryWrapper<Card> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("id", cardId);
+        queryWrapper.eq("card_number", cardNumber).eq("type", cardType);
         Card card = cardMapper.selectOne(queryWrapper);
         if (card == null) {
             throw new BizException(StatusCode.BAD_REQUEST, Message.CARD_NOT_EXISTS);
         }
         // check if the card is binding with the user
         QueryWrapper<UserCardBinding> bindingQuery = new QueryWrapper<>();
-        bindingQuery.eq("user_id", userId).eq("card_id", cardId);
+        bindingQuery.eq("user_id", userId).eq("card_id", card.getId());
         UserCardBinding existing = userCardBindingMapper.selectOne(bindingQuery);
+        System.out.println(existing);
         if (existing != null) {
             throw new BizException(StatusCode.BAD_REQUEST, Message.CARD_ALREADY_BIND);
         }
         UserCardBinding binding = UserCardBinding.builder()
                 .userId(userId)
-                .cardId(cardId)
+                .cardId(card.getId())
                 .build();
         userCardBindingMapper.insert(binding);
     }

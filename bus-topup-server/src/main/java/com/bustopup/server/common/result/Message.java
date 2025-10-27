@@ -48,6 +48,5 @@ public class Message {
     public static final String AMOUNT_NULL = "Amount cannot be null!";
     public static final String AMOUNT_MORE_THAN_0 = "Amount must be greater than 0";
     public static final String TYPE_NULL = "Type cannot be null!";
-    public static final String TRANSACTION_ADDED = "Transaction added!";
     public static final String GET_TRANSACTION_SUCCESS = "Get transaction successful!";
 }

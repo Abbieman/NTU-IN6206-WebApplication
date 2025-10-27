@@ -34,7 +34,7 @@ public class TransactionController {
         } else {
             transactionService.processRefund(addTransactionDTO.getCardNumber(), addTransactionDTO.getAmount());
         }
-        return Result.success(Message.TRANSACTION_ADDED);
+        return Result.success(Message.SUCCESS);
     }
 
     @GetMapping("/getTransactionList")
