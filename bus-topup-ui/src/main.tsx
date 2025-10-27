@@ -1,21 +1,32 @@
+import Cookies from "js-cookie";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
+import { useWebSocketNotification } from "./hooks/useWebSocketNotification";
 import "./index.css";
 import router from "./router/index";
 
+function RootApp() {
+  const userId = Cookies.get("userId") || undefined;
+  // 登录时建立 WebSocket 连接
+  const { Notification } = useWebSocketNotification(userId);
+  return (
+    <>
+      <RouterProvider router={router} />
+      {Notification}
+    </>
+  );
+}
+
+export default RootApp;
+
 const rootElement = document.getElementById("root");
-if (rootElement === null) {
+if (!rootElement) {
   throw new Error("Root element not found");
 }
-const root = ReactDOM.createRoot(rootElement);
 
-root.render(
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <RootApp />
   </React.StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals

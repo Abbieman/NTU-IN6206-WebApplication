@@ -107,7 +107,9 @@ const Login: React.FC = () => {
     const res = await authLogin(loginForm);
     if (res.code === 200) {
       setIsLoading(false);
-      Cookies.set("token", res.data, { expires: 1 });
+      Cookies.set("token", res.data.token, { expires: 1 });
+      Cookies.set("userId", res.data.id, { expires: 1 });
+      Cookies.set("role", res.data.role, { expires: 1 });
       toast.success(res.msg || "Login successful!");
       setTimeout(() => {
         navigate("/my-card");

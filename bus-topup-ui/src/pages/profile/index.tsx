@@ -142,6 +142,8 @@ const Profile: React.FC = () => {
     if (res.code === 200) {
       toast.success(res.msg || "Logged out successfully!");
       Cookies.remove("token");
+      Cookies.remove("userId");
+      Cookies.remove("role");
       setTimeout(() => {
         navigate("/login");
       }, 2000);

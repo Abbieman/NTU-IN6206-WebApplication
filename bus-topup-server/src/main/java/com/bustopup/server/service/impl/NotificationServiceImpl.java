@@ -31,6 +31,7 @@ public class NotificationServiceImpl implements NotificationService {
         List<Notification> notifications = notificationMapper.selectList(queryWrapper);
         return notifications.stream()
                 .map(n ->  NotificationVo.builder()
+                    .id(n.getId())
                     .title(n.getTitle())
                     .content(n.getContent())
                     .type(n.getType())

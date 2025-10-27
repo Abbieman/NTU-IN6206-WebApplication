@@ -1,104 +1,52 @@
 import {
   AlertCircle,
-  Bell,
   Clock,
-  Gift,
   Mail,
   Search,
   Trash2,
   TrendingUp,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { Notification } from "../../api/notification";
+import { getNotificationList } from "../../api/notification";
+import { formatMessageTime } from "../../utils/time";
 
 interface Message {
   id: number;
-  type: "notification" | "promotion" | "system" | "transaction";
+  type: "TOP_UP" | "PAYMENT" | "REFUND" | "SYSTEM";
   title: string;
   content: string;
   timestamp: string;
   read: boolean;
-  icon: "gift" | "bell" | "alert" | "transaction";
+  icon: "alert" | "transaction";
 }
 
 const Messages = () => {
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      type: "promotion",
-      title: "🎉 Win a ¥60 e-voucher!",
-      content:
-        "Take 25 rides each month to join the lucky draw — check details now.",
-      timestamp: "2 hours ago",
-      read: false,
-      icon: "gift",
-    },
-    {
-      id: 2,
-      type: "transaction",
-      title: "Top-up Successful",
-      content:
-        "You’ve successfully added ¥50 to your Student Card. Current balance: ¥66.11.",
-      timestamp: "5 hours ago",
-      read: false,
-      icon: "transaction",
-    },
-    {
-      id: 3,
-      type: "transaction",
-      title: "Fare Deduction",
-      content: "Oct 22, 2025 – MRT ride fare deducted: ¥2.50.",
-      timestamp: "3 days ago",
-      read: true,
-      icon: "transaction",
-    },
-    {
-      id: 4,
-      type: "system",
-      title: "Student Card Verification Expiring Soon",
-      content:
-        "Your student card verification will expire in 30 days. Please update your info in time.",
-      timestamp: "1 week ago",
-      read: true,
-      icon: "alert",
-    },
-    {
-      id: 5,
-      type: "notification",
-      title: "New Feature Available",
-      content: "Transit Wallet now supports Alipay+™ payments — try it today!",
-      timestamp: "1 week ago",
-      read: true,
-      icon: "bell",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const [searchQuery, setSearchQuery] = useState("");
 
   const getIconComponent = (iconType: string) => {
     switch (iconType) {
-      case "gift":
-        return Gift;
-      case "bell":
-        return Bell;
       case "alert":
         return AlertCircle;
       case "transaction":
         return TrendingUp;
       default:
-        return Bell;
+        return TrendingUp;
     }
   };
 
   const getIconColor = (type: string) => {
     switch (type) {
-      case "promotion":
+      case "REFUND":
         return "bg-gradient-to-br from-purple-500 to-pink-500";
-      case "transaction":
+      case "TOP_UP":
         return "bg-gradient-to-br from-green-500 to-emerald-600";
-      case "system":
+      case "PAYMENT":
         return "bg-gradient-to-br from-orange-500 to-red-600";
-      case "notification":
+      case "SYSTEM":
         return "bg-gradient-to-br from-blue-500 to-indigo-600";
       default:
         return "bg-gradient-to-br from-gray-500 to-gray-600";
@@ -117,6 +65,28 @@ const Messages = () => {
 
   const unreadCount = messages.filter((m) => !m.read).length;
 
+  useEffect(() => {
+    const fetchNotification = async () => {
+      const notificationList: Message[] = [];
+      const res = await getNotificationList();
+      if (res.code === 200) {
+        res.data.forEach((item: Notification) => {
+          notificationList.push({
+            id: item.id,
+            title: item.title,
+            content: item.content,
+            read: item.isRead,
+            type: item.type,
+            timestamp: item.createdAt,
+            icon: item.type === "SYSTEM" ? "alert" : "transaction",
+          });
+        });
+        setMessages(notificationList);
+      }
+    };
+    fetchNotification();
+  }, []);
+
   const markAsRead = (id: number) => {
     setMessages(
       messages.map((msg) => (msg.id === id ? { ...msg, read: true } : msg))
@@ -128,7 +98,7 @@ const Messages = () => {
   };
 
   const deleteMessage = (id: number) => {
-    setMessages(messages.filter((msg) => msg.id !== id));
+    console.log("Delete message with id:", id);
   };
 
   return (
@@ -205,7 +175,9 @@ const Messages = () => {
               return (
                 <div
                   key={message.id}
-                  onClick={() => !message.read && markAsRead(message.id)}
+                  onClick={() =>
+                    !message.read && markAsRead(message.id as number)
+                  }
                   className={`bg-white rounded-2xl p-4 shadow-sm transition-all cursor-pointer hover:shadow-md ${
                     !message.read ? "border-2 border-blue-500" : ""
                   }`}
@@ -240,13 +212,13 @@ const Messages = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center text-xs text-gray-400">
                           <Clock className="w-3 h-3 mr-1" />
-                          {message.timestamp}
+                          {formatMessageTime(message.timestamp)}
                         </div>
                         <div className="flex gap-2">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              deleteMessage(message.id);
+                              deleteMessage(message.id as number);
                             }}
                             className="text-gray-400 hover:text-red-500 transition p-1"
                           >

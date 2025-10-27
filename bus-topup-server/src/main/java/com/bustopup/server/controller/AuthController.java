@@ -6,11 +6,11 @@ import com.bustopup.server.common.result.StatusCode;
 import com.bustopup.server.dto.LoginDTO;
 import com.bustopup.server.dto.RegisterDTO;
 import com.bustopup.server.service.AuthService;
+import com.bustopup.server.vo.LoginVo;
 import com.bustopup.server.vo.UserInfoVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,9 +35,9 @@ public class AuthController {
     // Authorization login
     @PostMapping("/login")
     @Operation(summary = "login")
-    public Result<Object> login(@Valid @RequestBody LoginDTO loginDTO, HttpServletResponse response) {
-        String token = authService.login(loginDTO);
-        return Result.success(token, Message.LOGIN_SUCCESS);
+    public Result<LoginVo> login(@Valid @RequestBody LoginDTO loginDTO) {
+        LoginVo loginVo = authService.login(loginDTO);
+        return Result.success(loginVo, Message.LOGIN_SUCCESS);
     }
 
     // Authorization logout

@@ -12,6 +12,7 @@ import com.bustopup.server.enums.UserRole;
 import com.bustopup.server.mapper.UserMapper;
 import com.bustopup.server.service.AuthService;
 import com.bustopup.server.utils.JwtUtil;
+import com.bustopup.server.vo.LoginVo;
 import com.bustopup.server.vo.UserInfoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -58,7 +59,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(LoginDTO loginDTO) {
+    public LoginVo login(LoginDTO loginDTO) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", loginDTO.getUsername());
         User user = userMapper.selectOne(queryWrapper);
@@ -70,7 +71,11 @@ public class AuthServiceImpl implements AuthService {
         }
         String token = JwtUtil.generateToken(user.getId(), user.getRole());
         redisTemplate.opsForValue().set("busTopup:token:" + token, user.getId(), TOKEN_EXPIRE, TimeUnit.SECONDS);
-        return token;
+        return LoginVo.builder()
+                .id(user.getId())
+                .role(user.getRole())
+                .token(token)
+                .build();
     }
 
     @Override

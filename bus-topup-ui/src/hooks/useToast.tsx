@@ -1,4 +1,3 @@
-// src/hooks/useToast.ts
 import { useCallback, useState } from "react";
 import { ToastContainer } from "../components/ToastContainer";
 
