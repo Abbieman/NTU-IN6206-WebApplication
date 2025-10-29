@@ -1,6 +1,8 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
+const BASE_URL = "http://www.bus.topup.com/api";
+
 export interface ResponseData<T> {
   code: number;
   msg: string;
@@ -8,7 +10,7 @@ export interface ResponseData<T> {
 }
 
 export const instance = axios.create({
-  baseURL: "http://www.bus.topup.com/api",
+  baseURL: BASE_URL,
   timeout: 5000,
 });
 

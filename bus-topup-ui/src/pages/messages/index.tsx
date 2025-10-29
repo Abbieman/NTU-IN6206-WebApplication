@@ -8,11 +8,15 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Notification } from "../../api/notification";
-import { getNotificationList } from "../../api/notification";
+import {
+  deleteNotification,
+  getNotificationList,
+  readNotification,
+} from "../../api/notification";
 import { formatMessageTime } from "../../utils/time";
 
 interface Message {
-  id: number;
+  id: string;
   type: "TOP_UP" | "PAYMENT" | "REFUND" | "SYSTEM";
   title: string;
   content: string;
@@ -87,18 +91,22 @@ const Messages = () => {
     fetchNotification();
   }, []);
 
-  const markAsRead = (id: number) => {
+  const markAsRead = async (id: string) => {
     setMessages(
       messages.map((msg) => (msg.id === id ? { ...msg, read: true } : msg))
     );
+    await readNotification({ id });
   };
 
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
+    const idList = messages.map((msg) => msg.id);
     setMessages(messages.map((msg) => ({ ...msg, read: true })));
+    await readNotification({ ids: idList });
   };
 
-  const deleteMessage = (id: number) => {
-    console.log("Delete message with id:", id);
+  const deleteMessage = async (id: string) => {
+    setMessages(messages.filter((msg) => msg.id !== id));
+    await deleteNotification({ id });
   };
 
   return (
@@ -109,7 +117,9 @@ const Messages = () => {
           <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
           {unreadCount > 0 && (
             <div
-              onClick={markAllAsRead}
+              onClick={() => {
+                markAllAsRead();
+              }}
               className="text-sm text-blue-600 font-semibold hover:text-blue-700"
             >
               Mark All as Read
@@ -176,7 +186,7 @@ const Messages = () => {
                 <div
                   key={message.id}
                   onClick={() =>
-                    !message.read && markAsRead(message.id as number)
+                    !message.read && markAsRead(message.id as string)
                   }
                   className={`bg-white rounded-2xl p-4 shadow-sm transition-all cursor-pointer hover:shadow-md ${
                     !message.read ? "border-2 border-blue-500" : ""
@@ -218,7 +228,7 @@ const Messages = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              deleteMessage(message.id as number);
+                              deleteMessage(message.id as string);
                             }}
                             className="text-gray-400 hover:text-red-500 transition p-1"
                           >

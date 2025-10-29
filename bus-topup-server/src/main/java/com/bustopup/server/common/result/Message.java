@@ -7,6 +7,7 @@ public class Message {
 
     // ====== Common ======
     public static final String SUCCESS = "Success";
+    public static final String FAIL = "Fail";
 
     // ====== Exception ======
     public static final String REQUEST_BODY_NOT_CORRECT = "Request body is not correct!";
@@ -49,4 +50,7 @@ public class Message {
     public static final String AMOUNT_MORE_THAN_0 = "Amount must be greater than 0";
     public static final String TYPE_NULL = "Type cannot be null!";
     public static final String GET_TRANSACTION_SUCCESS = "Get transaction successful!";
+
+    // ====== NOTIFICATION ======
+    public static final String NOTIFICATION_NOT_EXISTS = "Notification not exists!";
 }

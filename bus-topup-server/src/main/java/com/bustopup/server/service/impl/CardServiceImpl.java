@@ -70,7 +70,6 @@ public class CardServiceImpl implements CardService {
         QueryWrapper<UserCardBinding> bindingQuery = new QueryWrapper<>();
         bindingQuery.eq("user_id", userId).eq("card_id", card.getId());
         UserCardBinding existing = userCardBindingMapper.selectOne(bindingQuery);
-        System.out.println(existing);
         if (existing != null) {
             throw new BizException(StatusCode.BAD_REQUEST, Message.CARD_ALREADY_BIND);
         }

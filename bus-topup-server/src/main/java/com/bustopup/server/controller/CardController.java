@@ -38,7 +38,6 @@ public class CardController {
     @PostMapping("/bindCard")
     @Operation(summary = "bind new card")
     public Result<Object> bindCard(@RequestBody Map<String, String> body) {
-        System.out.println(body);
         String cardNumber = body.get("cardNumber");
         CardType cardType = CardType.valueOf(body.get("cardType"));
         cardService.bindCard(cardNumber, cardType);
