@@ -26,8 +26,12 @@ export const readNotification = (
   return instance.post("/notification/readNotification", data);
 };
 
-export const deleteNotification = (data: {
-  id: string;
-}): Promise<ResponseData<object>> => {
+export const deleteNotification = (
+  data:
+    | {
+        id: string;
+      }
+    | { ids: string[] }
+): Promise<ResponseData<object>> => {
   return instance.post("notification/delete", data);
 };
